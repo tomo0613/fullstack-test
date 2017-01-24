@@ -1,24 +1,20 @@
 const path = require('path');
-const nodeExternals = require('webpack-node-externals');
 
-console.log(path.resolve(__dirname, "./public"));
-
-module.eports = {
-    entry: path.join(__dirname, 'src', 'client', 'index.ts'),
+module.exports = {
+    entry: path.join(__dirname, 'src', 'client', 'index.js'),
     output: {
-        path: path.join(__dirname, 'public'),
+        path: path.join(__dirname, 'build'),
         filename: 'bundle.js'
     },
-    resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js']
-    },
-    target: 'node',
-    externals: [nodeExternals()],
     module: {
         loaders: [{
-            test: /\.ts$/,
-            // exclude: /node_modules/,
-            loader: 'ts-loader'
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: 'babel-loader',
+            query: {
+                presets: ['env', 'react'],
+                plugins: ['transform-class-properties']
+            }
         }]
     }
 };
