@@ -49,8 +49,8 @@ class userManager {
       * @return (array): [rows]
       */
     findUser(userData, findBy = 'name') {
-        let sql = {
-            query: `SELECT * FROM users WHERE ${findBy} = ${mysql.escape(userData)}`
+        const sql = {
+            query: `SELECT * FROM users WHERE ` + (userData ? `${findBy} = ${mysql.escape(userData)}` : 1)
         };
         return new Promise((resolve, reject) => {
             this.performQuery(sql).then(result => {
@@ -68,21 +68,23 @@ class userManager {
       * @return (string)
       */
     addUser(userObj) {
-        let that = this;
-        function checkData(key) {
+        const checkData = (key) => {
             return new Promise((resolve, reject) => {
-                that.findUser(userObj[key], key).then(result => {
-                    if (result) {
-                        resolve(result);
-                    } else {
+                if (!userObj[key]) {
+                    reject(`Rejected! Missing ${key}`);
+                }
+                this.findUser(userObj[key], key).then(result => {
+                    if (!result) {
                         reject(error);
+                    } else {
+                        resolve(result);
                     }
                 });
             });
-        }
+        };
         return Promise.all([checkData('name'), checkData('email')]).then(results => {
             userObj.registration_date = new Date();
-            let sql = {
+            const sql = {
                 query: 'INSERT INTO users SET ?',
                 values: userObj
             };
