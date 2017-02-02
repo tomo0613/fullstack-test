@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('promise-mysql');
 const dbConfig = require('../.dbConfig');
 
 class userManager {
@@ -10,36 +10,20 @@ class userManager {
 
     /**
       * @param sql (object): { query: 'string', values: (object) || (null) }
-      * @return (object): { rows: [], fields: [], sql: {}}
+      * @return (array): [rows]
       */
     performQuery(sql) {
-        return new Promise((resolve, reject) => {
-            this.connectionPool.getConnection((error, connection) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(connection);
-                }
+        return this.connectionPool.getConnection().then(connection => {
+            return connection.query(sql.query, sql.values).then(rows => {
+                //TODO print query string
+                this.connectionPool.releaseConnection(connection);
+                return rows;
+            }).catch(error => {
+                console.error(error);
             });
-        }).then(connection => {
-            const result = new Promise((resolve, reject) => {
-                connection.query(sql.query, sql.values || null, (error, rows, fields) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve({rows: rows, fields: fields, sql: sql});
-                    }
-                });
-            });
-            return result.then(releaseConnection, releaseConnection);
-
-            function releaseConnection() {
-                connection.release();
-                return result;
-            }
         }).catch(error => {
             error.sql = sql;
-            throw error;
+            console.error(error);
         });
     }
 
@@ -48,17 +32,21 @@ class userManager {
       * @param findBy (string)
       * @return (array): [rows]
       */
-    findUser(userData, findBy = 'name') {
+    findUser(userData = 0, findBy = 'name') {
+
         const sql = {
-            query: `SELECT * FROM users WHERE ` + (userData ? `${findBy} = ${mysql.escape(userData)}` : 1)
+            query: `SELECT * FROM users WHERE ${findBy} = ?`,
+            values: userData
         };
         return new Promise((resolve, reject) => {
-            this.performQuery(sql).then(result => {
-                if (result) {
-                    resolve(result.rows);
+            this.performQuery(sql).then(rows => {
+                if (rows) {
+                    resolve(rows);
                 } else {
-                    reject(error);
+                    reject(`Rejected! No user found.`);
                 }
+            }).catch(error => {
+                console.error(error)
             });
         });
     }
@@ -84,6 +72,7 @@ class userManager {
         };
         return Promise.all([checkData('name'), checkData('email')]).then(results => {
             userObj.registration_date = new Date();
+            //TODO use UUID
             const sql = {
                 query: 'INSERT INTO users SET ?',
                 values: userObj
@@ -111,9 +100,19 @@ class userManager {
         });
     }
 
-    update() {}
+    update() {
+        const sql = {
+            query: 'UPDATE users SET foo = ?, bar = ?, baz = ? WHERE id = ?',
+            values: [] // ['a', 'b', 'c', userId]
+        };
+    }
 
-    delete() {}
+    delete() {
+        const sql = {
+            query: 'DELETE FROM `users` WHERE id = ?',
+            values: '' // 'UUID'
+        };
+    }
 }
 
 module.exports = new userManager();

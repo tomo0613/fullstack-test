@@ -53,7 +53,6 @@ router.route('/users/:user_id')
     })
     .delete((req, res) => {
         console.log('delete user', req.params.user_id);
-
     });
 
 app.use('/api', router);
@@ -67,7 +66,15 @@ var dummyUser = {
     password: 'pw',
     email: 'usr@mail4'
 };
- 
+
+// userManager.findUser('usr1').then(result => {
+//     console.log(`userManager response: \n`, result);
+//     res.json(result);
+// }).catch(error => {
+//     res.send(error);
+//     console.error(error);
+// });
+
 // userManager.addUser(dummyUser).then(result => {
 //     console.log(`userManager response: \n`, result);
 // }).catch(error => console.error(error));
