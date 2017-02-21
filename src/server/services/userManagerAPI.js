@@ -48,8 +48,16 @@ router.route('/users/:user_id')
         });
     })
     .put((req, res) => {
-        console.log('update user', req.params.user_id);
-
+        //TODO
+        console.log('update user',req.body, req.params.user_id);
+        userManager.updateUser(req.body ,req.params.user_id).then(result => {
+            console.log(`userManager update: \n`, result);
+            res.json(result);
+        }).catch(error => {
+            console.log('update err');
+            res.send(error);
+            console.error(error);
+        });
     })
     .delete((req, res) => {
         console.log('delete user', req.params.user_id);
@@ -62,12 +70,12 @@ app.listen(app.get('port'), () => {
 });
 
 var dummyUser = {
-    name: 'usr4',
+    name: 'usr6',
     password: 'pw',
-    email: 'usr@mail4'
+    email: 'usr@mail6'
 };
 
-// userManager.findUser('usr1').then(result => {
+// userManager.deleteUser(3).then(result => {
 //     console.log(`userManager response: \n`, result);
 //     res.json(result);
 // }).catch(error => {

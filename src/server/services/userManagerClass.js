@@ -9,13 +9,12 @@ class userManager {
     }
 
     /**
-      * @param sql (object): { query: 'string', values: (object) || (null) }
-      * @return (array): [rows]
-      */
+     * @param sql (object): { query: 'string', values: (object) || (null) }
+     * @return (array): [rows]
+     */
     performQuery(sql) {
         return this.connectionPool.getConnection().then(connection => {
             return connection.query(sql.query, sql.values).then(rows => {
-                //TODO print query string
                 this.connectionPool.releaseConnection(connection);
                 return rows;
             }).catch(error => {
@@ -28,22 +27,21 @@ class userManager {
     }
 
     /**
-      * @param userData (string)
-      * @param findBy (string)
-      * @return (array): [rows]
-      */
+     * @param userData (string)
+     * @param findBy (string)
+     * @return (array): [rows]
+     */
     findUser(userData = 0, findBy = 'name') {
-
         const sql = {
             query: `SELECT * FROM users WHERE ${findBy} = ?`,
             values: userData
         };
         return new Promise((resolve, reject) => {
             this.performQuery(sql).then(rows => {
-                if (rows) {
-                    resolve(rows);
+                if (!rows) {
+                    reject('Rejected! No user found.');
                 } else {
-                    reject(`Rejected! No user found.`);
+                    resolve(rows);
                 }
             }).catch(error => {
                 console.error(error)
@@ -52,66 +50,101 @@ class userManager {
     }
 
     /**
-      * @param userObj (object): {name: '', email: '', ...}
-      * @return (string)
-      */
+     * @param userObj (object): {name: '', email: '', ...}
+     * @param propsToCheck (array): ['name', ...]
+     * @return (array)
+     */
+    checkExistence(userObj, propsToCheck = ['name', 'email']) {
+        if (!userObj) {
+            throw Error('missing user object');
+        }
+        const checkProps = propsToCheck.map((prop) => {
+            if (userObj[prop]) {
+                return this.findUser(userObj[prop], prop);
+            } else {
+                return Promise.resolve([]);
+            }
+        });
+        return Promise.all(checkProps).then(results => {
+            let existingProps = [];
+            results.forEach((result, index) => {
+                if (result.length) {
+                    existingProps.push(propsToCheck[index]);
+                }
+            });
+            return Promise.resolve(existingProps);
+        }).catch(error => console.error(error));
+    }
+
+    /**
+     * @param userObj (object): {name: '', email: '', ...}
+     * @return (string)
+     */
     addUser(userObj) {
-        const checkData = (key) => {
-            return new Promise((resolve, reject) => {
-                if (!userObj[key]) {
-                    reject(`Rejected! Missing ${key}`);
-                }
-                this.findUser(userObj[key], key).then(result => {
-                    if (!result) {
-                        reject(error);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
+        const sql = {
+            query: `INSERT INTO users SET ?`,
+            values: userObj
         };
-        return Promise.all([checkData('name'), checkData('email')]).then(results => {
-            userObj.registration_date = new Date();
-            //TODO use UUID
-            const sql = {
-                query: 'INSERT INTO users SET ?',
-                values: userObj
-            };
-            return new Promise((resolve, reject) => {
-                let message;
-                if (!results) {
-                    reject(error);
-                } else if (results[0].length || results[1].length) {
-                    message = 'Error';
-                    if (results[0].length) {
-                        message += ' existingUsername';
-                    }
-                    if (results[1].length) {
-                        message += ' existingEmail';
-                    }
-                    resolve(message);
-                } else {
-                    this.performQuery(sql, userObj).then(result => {
-                        message = 'User successfully added';
-                        resolve(message);
-                    });
-                }
-            });
+        return this.checkExistence(userObj).then(response => {
+            if (response.length) {
+                return Promise.reject(`User exists with the given: ${response}`);
+            } else {
+                //TODO regDate + uuid
+                return this.performQuery(sql).then(rows => {
+                    return Promise.resolve((rows.affectedRows ? 'User successfully created' : 'No result'));
+                }).catch(error => {
+                    console.error(error);
+                });
+            }
+        }).catch(error => {
+            console.error(error);
         });
     }
 
-    update() {
+    /**
+     * @param userData (object): {name: '', email: '', ...}
+     * @param userId (number)
+     * @return (string)
+     */
+    updateUser(userData, userId) {
         const sql = {
-            query: 'UPDATE users SET foo = ?, bar = ?, baz = ? WHERE id = ?',
-            values: [] // ['a', 'b', 'c', userId]
+            query: 'UPDATE users SET ? WHERE id = ?',
+            values: [userData, userId]
         };
+        return this.checkExistence(userData).then(response => {
+            if (response.length) {
+                return Promise.reject(`existing props: ${response}`);
+            } else {
+                return this.performQuery(sql).then(rows => {
+                    return Promise.resolve((rows.changedRows ? 'User successfully updated' : 'No result'));
+                }).catch(error => {
+                    console.error(error)
+                });
+            }
+        }).catch(error => {
+            console.error(error);
+        });
     }
 
-    delete() {
+    /**
+     * TODO
+     */
+    deleteUser(userId) {
         const sql = {
             query: 'DELETE FROM `users` WHERE id = ?',
-            values: '' // 'UUID'
+            values: userId // TODO 'UUID'
         };
+        return new Promise((resolve, reject) => {
+            this.performQuery(sql).then(rows => {
+                if (rows) {
+                    resolve((rows.affectedRows ? 'User successfully deleted' : 'No result'));
+                } else {
+                    reject();
+                }
+            }).catch(error => {
+                console.error(error)
+            });
+        });
     }
 }
 
