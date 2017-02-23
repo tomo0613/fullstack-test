@@ -49,7 +49,7 @@ router.route('/users/:user_id')
     })
     .put((req, res) => {
         //TODO
-        console.log('update user',req.body, req.params.user_id);
+        console.log('update user', req.body, req.params.user_id);
         userManager.updateUser(req.body ,req.params.user_id).then(result => {
             console.log(`userManager update: \n`, result);
             res.json(result);
@@ -60,7 +60,9 @@ router.route('/users/:user_id')
         });
     })
     .delete((req, res) => {
-        console.log('delete user', req.params.user_id);
+        userManager.deleteUser(req.params.user_id).then(result => {
+            console.log(result);
+        })
     });
 
 app.use('/api', router);
@@ -68,21 +70,3 @@ app.use('/api', router);
 app.listen(app.get('port'), () => {
     console.log(`user-manager started on port: ${app.get('port')}`);
 });
-
-var dummyUser = {
-    name: 'usr6',
-    password: 'pw',
-    email: 'usr@mail6'
-};
-
-// userManager.deleteUser(3).then(result => {
-//     console.log(`userManager response: \n`, result);
-//     res.json(result);
-// }).catch(error => {
-//     res.send(error);
-//     console.error(error);
-// });
-
-// userManager.addUser(dummyUser).then(result => {
-//     console.log(`userManager response: \n`, result);
-// }).catch(error => console.error(error));

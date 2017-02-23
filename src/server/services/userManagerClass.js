@@ -3,9 +3,27 @@ const dbConfig = require('../.dbConfig');
 
 class userManager {
     constructor() {
+        this.tableName = 'users2';
         dbConfig.database = 'node_test';
         // dbConfig.connectionLimit = 10;
         this.connectionPool = mysql.createPool(dbConfig);
+    }
+
+    createTable() {
+        const query = `CREATE TABLE IF NOT EXISTS ${this.tableName} (
+            id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(60),
+            email VARCHAR(60),
+            passwd VARCHAR(60),
+            status VARCHAR(60),
+            last_login DATETIME,
+            registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY(id)
+        )`;
+        return this.performQuery({query: query, values: null}).then(result => {
+
+            return Promise.resolve(results);
+        });
     }
 
     /**
@@ -16,13 +34,11 @@ class userManager {
         return this.connectionPool.getConnection().then(connection => {
             return connection.query(sql.query, sql.values).then(rows => {
                 this.connectionPool.releaseConnection(connection);
-                return rows;
-            }).catch(error => {
-                console.error(error);
-            });
+                return Promise.resolve(rows);
+            }).catch(error => Promise.reject(error));
         }).catch(error => {
             error.sql = sql;
-            console.error(error);
+            return Promise.reject(error);
         });
     }
 
@@ -31,22 +47,18 @@ class userManager {
      * @param findBy (string)
      * @return (array): [rows]
      */
-    findUser(userData = 0, findBy = 'name') {
+    findUser(userData, findBy = 'name') {
+        if (userData !== undefined) {
+            userData += '';
+        }
         const sql = {
-            query: `SELECT * FROM users WHERE ${findBy} = ?`,
-            values: userData
+            query: userData ? `SELECT * FROM ${this.tableName} WHERE ${findBy} = ?` : `SELECT * FROM ${this.tableName}`,
+            values: userData || null
         };
-        return new Promise((resolve, reject) => {
-            this.performQuery(sql).then(rows => {
-                if (!rows) {
-                    reject('Rejected! No user found.');
-                } else {
-                    resolve(rows);
-                }
-            }).catch(error => {
-                console.error(error)
-            });
-        });
+        console.log(sql);
+        return this.performQuery(sql).then(rows => {
+            return Promise.resolve(rows);
+        }).catch(error => Promise.reject(error));
     }
 
     /**
@@ -82,33 +94,32 @@ class userManager {
      */
     addUser(userObj) {
         const sql = {
-            query: `INSERT INTO users SET ?`,
+            query: `INSERT INTO ${this.tableName} SET ?`,
             values: userObj
         };
         return this.checkExistence(userObj).then(response => {
             if (response.length) {
                 return Promise.reject(`User exists with the given: ${response}`);
             } else {
-                //TODO regDate + uuid
                 return this.performQuery(sql).then(rows => {
-                    return Promise.resolve((rows.affectedRows ? 'User successfully created' : 'No result'));
-                }).catch(error => {
-                    console.error(error);
-                });
+                    if (rows.affectedRows) {
+                        return Promise.resolve('User successfully created');
+                    } else {
+                        return Promise.reject('User creation failed');
+                    }
+                }).catch(error => Promise.reject(error));
             }
-        }).catch(error => {
-            console.error(error);
-        });
+        }).catch(error => Promise.reject(error));
     }
 
     /**
      * @param userData (object): {name: '', email: '', ...}
-     * @param userId (number)
+     * @param userId (TODO)
      * @return (string)
      */
     updateUser(userData, userId) {
         const sql = {
-            query: 'UPDATE users SET ? WHERE id = ?',
+            query: `UPDATE ${this.tableName} SET ? WHERE id = ?`,
             values: [userData, userId]
         };
         return this.checkExistence(userData).then(response => {
@@ -116,35 +127,33 @@ class userManager {
                 return Promise.reject(`existing props: ${response}`);
             } else {
                 return this.performQuery(sql).then(rows => {
-                    return Promise.resolve((rows.changedRows ? 'User successfully updated' : 'No result'));
-                }).catch(error => {
-                    console.error(error)
-                });
+                    if (rows.changedRows) {
+                        return Promise.resolve('User successfully updated');
+                    } else {
+                        return Promise.reject('User update failed');
+                    }
+                }).catch(error => Promise.reject(error));
             }
-        }).catch(error => {
-            console.error(error);
-        });
+        }).catch(error => Promise.reject(error));
     }
 
     /**
-     * TODO
+     * @param userId (TODO)
+     * @return (string)
      */
     deleteUser(userId) {
+        userId += '';
         const sql = {
-            query: 'DELETE FROM `users` WHERE id = ?',
-            values: userId // TODO 'UUID'
+            query: `DELETE FROM ${this.tableName} WHERE id = ?`,
+            values: userId
         };
-        return new Promise((resolve, reject) => {
-            this.performQuery(sql).then(rows => {
-                if (rows) {
-                    resolve((rows.affectedRows ? 'User successfully deleted' : 'No result'));
-                } else {
-                    reject();
-                }
-            }).catch(error => {
-                console.error(error)
-            });
-        });
+        return this.performQuery(sql).then(rows => {
+            if (rows.affectedRows) {
+                return Promise.resolve('User successfully deleted');
+            } else {
+                return Promise.reject('Delete failed');
+            }
+        }).catch(error => Promise.reject(error));
     }
 }
 
