@@ -4,7 +4,8 @@
   "description": "fullstack-test",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "run-dev": ""
+    "run-dev": "",
+    "start": "node srvr.js"
   },
   "author": "me",
   "license": "MIT",

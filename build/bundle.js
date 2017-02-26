@@ -74,23 +74,164 @@
 		function App() {
 			_classCallCheck(this, App);
 
-			return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+			var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
+
+			_this.state = {
+				users: [],
+				requestMethod: 'getUser',
+				userId: null,
+				form: {}
+			};
+			_this.updateUsers = _this.updateUsers.bind(_this);
+			_this.createSubmitButton = _this.createSubmitButton.bind(_this);
+			_this.createUsersList = _this.createUsersList.bind(_this);
+			_this.createMethodSelectInput = _this.createMethodSelectInput.bind(_this);
+			_this.createParamsForm = _this.createParamsForm.bind(_this);
+			_this.getForm = _this.getForm.bind(_this);
+			return _this;
 		}
 
 		_createClass(App, [{
 			key: 'componentDidMount',
 			value: function componentDidMount() {
 				this.socket = (0, _socket2.default)('/');
+				this.socket.on('getUserRes', this.updateUsers);
 			}
 		}, {
 			key: 'render',
 			value: function render() {
-				return _react2.default.DOM.div({}, _react2.default.DOM.h1({}, 'Hello world!'), _react2.default.DOM.button({
-					onClick: function () {
-						console.log('clicked');
-						this.socket.emit('client-request', { method: 'method1', params: 'param1' });
-					}.bind(this)
-				}, 'gomb'));
+				// console.log(this.state);
+				return _react2.default.DOM.div({}, _react2.default.DOM.h1({}, 'Hello world!'), this.createMethodSelectInput(), this.createParamsForm(), this.createSubmitButton(), this.createUsersList());
+			}
+		}, {
+			key: 'createSubmitButton',
+			value: function createSubmitButton() {
+				var _this2 = this;
+
+				return _react2.default.DOM.button({
+					onClick: function onClick() {
+						_this2.socket.emit('client-request', { method: _this2.state.requestMethod, params: _this2.getForm() });
+					}
+				}, 'submit');
+			}
+		}, {
+			key: 'createUsersList',
+			value: function createUsersList() {
+				var _this3 = this;
+
+				var columns = ['id', 'name', 'email', 'rank', 'registration_date'];
+
+				var createHead = function createHead() {
+					var headers = columns.map(function (colId, i) {
+						return _react2.default.DOM.th({ key: 'col' + (i + 1) + ': ' + colId }, colId);
+					});
+					return _react2.default.DOM.tr({}, headers);
+				};
+
+				var transformUserObj = function transformUserObj(userObj, i) {
+					return columns.map(function (colId, j) {
+						return _react2.default.DOM.td({ key: 'row' + (i + 1) + ' col' + (j + 1) }, userObj[colId]);
+					});
+				};
+
+				var createUsersList = function createUsersList() {
+					if (!_this3.state.users.length) {
+						return null;
+					}
+					return _this3.state.users.map(function (userObj, i) {
+						return _react2.default.DOM.tr({ key: 'row' + (i + 1) }, transformUserObj(userObj, i));
+					});
+				};
+
+				return _react2.default.DOM.table({}, _react2.default.DOM.thead({}, createHead()), _react2.default.DOM.tbody({}, createUsersList()));
+			}
+		}, {
+			key: 'createMethodSelectInput',
+			value: function createMethodSelectInput() {
+				var _this4 = this;
+
+				return _react2.default.DOM.select({
+					value: this.state.requestMethod,
+					onChange: function onChange(e) {
+						_this4.setState({ requestMethod: e.target.value });
+					}
+				}, _react2.default.DOM.option({ value: 'getUser' }, 'getUser'), _react2.default.DOM.option({ value: 'addUser' }, 'addUser'), _react2.default.DOM.option({ value: 'updateUser' }, 'updateUser'), _react2.default.DOM.option({ value: 'deleteUser' }, 'deleteUser'));
+			}
+		}, {
+			key: 'createParamsForm',
+			value: function createParamsForm() {
+				var _this5 = this;
+
+				// const createFormInput = (inputId) => {
+				// 	return React.DOM.input({
+				// 		placeholder: inputId,
+				// 		onBlur: (e) => {
+				// 			const newForm = {};
+				// 			if (this.state.form[inputId]) {
+				// 				newForm[inputId] = this.state.form[inputId];
+				// 			}
+				// 			if (e.target.value) {//
+				// 				newForm.email = e.target.value;
+				// 			}
+				// 			this.setState({
+				// 				form: newForm
+				// 			});
+				// 		}
+				// 	});
+				// };
+
+				return _react2.default.DOM.div({}, _react2.default.DOM.input({
+					disabled: this.props.requestMethod === 'addUser',
+					placeholder: 'userId',
+					onBlur: function onBlur(e) {
+						_this5.setState({
+							userId: e.target.value
+						});
+					}
+				}), 'name: ', _react2.default.DOM.input({
+					placeholder: 'name',
+					onBlur: function onBlur(e) {
+						var newForm = {};
+						if (_this5.state.form.email) {
+							newForm.email = _this5.state.form.email;
+						}
+						if (e.target.value) {
+							newForm.name = e.target.value;
+						}
+						_this5.setState({
+							form: newForm
+						});
+					}
+				}), 'email: ', _react2.default.DOM.input({
+					placeholder: 'email',
+					onBlur: function onBlur(e) {
+						var newForm = {};
+						if (_this5.state.form.name) {
+							newForm.name = _this5.state.form.name;
+						}
+						if (e.target.value) {
+							newForm.email = e.target.value;
+						}
+						_this5.setState({
+							form: newForm
+						});
+					}
+				}));
+			}
+		}, {
+			key: 'getForm',
+			value: function getForm() {
+				return [this.state.userId, this.state.form];
+			}
+		}, {
+			key: 'getUser',
+			value: function getUser(userId) {
+				this.socket.emit('client-request', { method: 'getUser', params: [] });
+			}
+		}, {
+			key: 'updateUsers',
+			value: function updateUsers(users) {
+				this.setState({ users: JSON.parse(users) });
 			}
 		}]);
 
