@@ -21,7 +21,6 @@ class userManager {
             PRIMARY KEY(id)
         )`;
         return this.performQuery({query: query, values: null}).then(result => {
-
             return Promise.resolve(results);
         });
     }
@@ -86,6 +85,13 @@ class userManager {
             });
             return Promise.resolve(existingProps);
         }).catch(error => console.error(error));
+    }
+
+    /**
+     * TODO
+     */
+    authenticateUser() {
+
     }
 
     /**

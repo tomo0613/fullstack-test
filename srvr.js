@@ -23,46 +23,49 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.use(bodyParser.urlencoded({extended: false}));
 
 io.on('connect', socket => {
-    socket.on('client-request', args => {
-        let userId = args.params[0] || '';
+    socket.on('action', (action) => {
+        let userId = action.data[0] || '';
         userId = (userId ? '?user_id=' + userId : userId);
 
-        switch (args.method) {
-            case 'getUser':
+        switch (action.type) {
+            case 'server/getUser':
                 httpOptions.path = '/api/users' + userId;
                 httpOptions.method = 'GET';
                 break;
-            case 'addUser':
+            case 'server/addUser':
                 httpOptions.path = '/api/users';
                 httpOptions.method = 'POST';
                 httpOptions.headers = {
                     'Content-Type': 'application/json'
                 };
                 break;
-            case 'updateUser':
+            case 'server/updateUser':
                 httpOptions.path = '/api/users' + userId;
                 httpOptions.method = 'PUT';
                 httpOptions.headers = {
                     'Content-Type': 'application/json'
                 };
                 break;
-            case 'deleteUser':
+            case 'server/deleteUser':
                 httpOptions.path = '/api/users' + userId;
                 httpOptions.method = 'DELETE';
                 break;
             default:
                 return;
         }
+
         const request = http.request(httpOptions, res => {
             res.setEncoding('utf8');
             res.on('data', data => {
                 console.log('on -> data: ', data);
-                socket.emit(args.method + 'Res', data);
+                const type = (httpOptions.method === 'GET' ? 'result' : 'response');
+                socket.emit('action', {type: type, data: data});
             });
         });
-        let postData = args.params[1];
-        postData = (postData && Object.keys(postData).length ? JSON.stringify(postData) : null);
-        if (postData && (httpOptions.method === 'POST' || httpOptions.method === 'PUT')) {
+
+        if (httpOptions.method === 'POST' || httpOptions.method === 'PUT') {
+            let postData = args.params[1];
+            postData = (postData && Object.keys(postData).length ? JSON.stringify(postData) : null);
             request.write(postData);
         }
         request.end();
