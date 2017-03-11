@@ -3,12 +3,27 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.config.js');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+
+(function() {
+    if (process.env.NODE_ENV !== 'dev') {
+        return;
+    }
+    console.log('--- DEV mode ---');
+    const webpack = require('webpack');
+    const webpackConfig = require('./webpack.dev.config.js');
+    const compiler = webpack(webpackConfig);
+    app.use(require('webpack-dev-middleware')(compiler, {
+        noInfo: true,
+        publicPath: webpackConfig.output.publicPath//noInfo
+    }));
+    app.use(require('webpack-hot-middleware')(compiler, {
+        log: console.log
+    }));
+})();
 
 const services = {
     userManager: require(path.join(__dirname, 'src', 'server', 'services', 'userManagerAPI.js'))
@@ -58,7 +73,7 @@ io.on('connect', socket => {
             res.setEncoding('utf8');
             res.on('data', data => {
                 console.log('on -> data: ', data);
-                const type = (httpOptions.method === 'GET' ? 'result' : 'response');
+                const type = (httpOptions.method === 'GET' ? 'server/result' : 'server/response');
                 socket.emit('action', {type: type, data: data});
             });
         });
@@ -75,5 +90,5 @@ io.on('connect', socket => {
 app.set('port', (process.env.PORT || 3000))
 
 server.listen(app.get('port'), () => {
-    console.log('listening on *:' + app.get('port'));
+    console.log('Server listening on PORT:' + app.get('port'));
 });

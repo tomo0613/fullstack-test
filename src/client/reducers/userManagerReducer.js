@@ -1,23 +1,20 @@
 const initialState = {
-
+    users: []
 };
 
 export default function reducer(state = initialState, action) {
     switch (action.type) {
-        case 'getForm':
-            console.log('getForm: ', action.data);
-            action.data.callback();
-            return Object.assign({}, {form: action.data.form});
-            //call refreshList
-            //Error: Reducers may not dispatch actions.
-        case 'response':
-            console.log('response: ', action.data);
+        case 'submitForm':
+            console.log('REDUCER CATCHES submitForm: ', action.data);
+            // return Object.assign({}, {form: action.data.form});
+        case 'server/response':
+            console.log('server/response: ', action.data);
             //TODO push()
             return Object.assign({}, {message: action.data});
-        case 'result':
+        case 'server/result':
             const users = JSON.parse(action.data)
-            console.log('result: ', users);
-            return Object.assign({}, {users: users});
+            console.log('server/result: ', users);
+            return Object.assign({}, state, {users: users});
         default:
             return state;
     }
