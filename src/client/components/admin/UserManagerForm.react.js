@@ -93,7 +93,7 @@ UserManagerForm = reduxForm({
 const selector = formValueSelector('userManager');
 
 UserManagerForm = connect(
-    state => {
+    (state) => {
         const method = selector(state, 'method');
         return {method};
     }

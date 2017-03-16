@@ -20,9 +20,7 @@ class userManager {
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY(id)
         )`;
-        return this.performQuery({query: query, values: null}).then(result => {
-            return Promise.resolve(results);
-        });
+        return this.performQuery( {query: query, values: null} ).then( result => Promise.resolve(result) );
     }
 
     /**
@@ -46,7 +44,7 @@ class userManager {
      * @param findBy (string)
      * @return (array): [rows]
      */
-    findUser(userData, findBy = 'name') {
+    findUser(userData, findBy = 'id') {
         if (userData !== undefined) {
             userData += '';
         }
@@ -54,7 +52,6 @@ class userManager {
             query: userData ? `SELECT * FROM ${this.tableName} WHERE ${findBy} = ?` : `SELECT * FROM ${this.tableName}`,
             values: userData || null
         };
-        console.log(sql);
         return this.performQuery(sql).then(rows => {
             return Promise.resolve(rows);
         }).catch(error => Promise.reject(error));
@@ -84,7 +81,7 @@ class userManager {
                 }
             });
             return Promise.resolve(existingProps);
-        }).catch(error => console.error(error));
+        }).catch(error => Promise.reject(error));
     }
 
     /**

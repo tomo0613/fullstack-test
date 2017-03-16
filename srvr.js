@@ -39,12 +39,10 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 io.on('connect', socket => {
     socket.on('action', (action) => {
-        let userId = action.data[0] || '';
-        userId = (userId ? '?user_id=' + userId : userId);
+        httpOptions.path = path.join('/api/users', action.userId || '');
 
         switch (action.type) {
             case 'server/getUser':
-                httpOptions.path = '/api/users' + userId;
                 httpOptions.method = 'GET';
                 break;
             case 'server/addUser':
@@ -55,14 +53,12 @@ io.on('connect', socket => {
                 };
                 break;
             case 'server/updateUser':
-                httpOptions.path = '/api/users' + userId;
                 httpOptions.method = 'PUT';
                 httpOptions.headers = {
                     'Content-Type': 'application/json'
                 };
                 break;
             case 'server/deleteUser':
-                httpOptions.path = '/api/users' + userId;
                 httpOptions.method = 'DELETE';
                 break;
             default:
@@ -72,14 +68,13 @@ io.on('connect', socket => {
         const request = http.request(httpOptions, res => {
             res.setEncoding('utf8');
             res.on('data', data => {
-                console.log('on -> data: ', data);
                 const type = (httpOptions.method === 'GET' ? 'server/result' : 'server/response');
                 socket.emit('action', {type: type, data: data});
             });
         });
 
         if (httpOptions.method === 'POST' || httpOptions.method === 'PUT') {
-            let postData = args.params[1];
+            let postData = action.userData;
             postData = (postData && Object.keys(postData).length ? JSON.stringify(postData) : null);
             request.write(postData);
         }
@@ -87,7 +82,7 @@ io.on('connect', socket => {
     });
 });
 
-app.set('port', (process.env.PORT || 3000))
+app.set('port', (process.env.PORT || 3000));
 
 server.listen(app.get('port'), () => {
     console.log('Server listening on PORT:' + app.get('port'));

@@ -9,25 +9,15 @@ const socket = io('/');
 const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
 
 ///
-function testMiddleware({ getState }) {
-  return ({ dispatch, getState }) => (next) => (action) => {
-    // console.log('will dispatch', action)
-
-    if (action.type === 'submitForm') {
-        console.log('MIDDLEWARE CATCHES submitForm');
+const testMiddleware = (store) => (next) => (action) => {
+    if (['server/addUser', 'server/updateUser', 'server/deleteUser'].indexOf(action.type) > -1) {
+        // console.log('middleware dispatch server/getUser');
+        //TODO wait for prev action
+        store.dispatch({type: `server/getUser`, data: {}});
     }
 
-    // Call the next dispatch method in the middleware chain.
-    let returnValue = next(action)
-
-    // console.log('state after dispatch', getState())
-
-    // This will likely be the action itself, unless
-    // a middleware further in chain changed it.
-    return returnValue
-  }
-}
-///
+    return next(action);
+};
 
 const reducers = {
     userManager: userManagerReducer,
@@ -36,8 +26,8 @@ const reducers = {
 };
 
 const reducer = combineReducers(reducers);
-const middlewares = [socketIoMiddleware];
-const store = applyMiddleware(...middlewares)(createStore)(reducer);
-// const store = createStore(reducer, applyMiddleware(...middlewares));
+const middlewares = [socketIoMiddleware, testMiddleware];
+// const store = applyMiddleware(...middlewares)(createStore)(reducer);
+const store = createStore(reducer, applyMiddleware(...middlewares));
 
 export default store;

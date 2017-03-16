@@ -12,9 +12,7 @@ export default function reducer(state = initialState, action) {
             //TODO push()
             return Object.assign({}, {message: action.data});
         case 'server/result':
-            const users = JSON.parse(action.data)
-            console.log('server/result: ', users);
-            return Object.assign({}, state, {users: users});
+            return Object.assign({}, state, {users: JSON.parse(action.data)});
         default:
             return state;
     }

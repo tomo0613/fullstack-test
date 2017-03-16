@@ -2,8 +2,11 @@ import store from '../store/store';
 
 const userManagerActions = {
     submitForm: (form) => {
-        console.log('\nuserManagerActions -> submitForm: ', form);
-        store.dispatch({type: `server/${form.method}`, data: {form: form}});
+        const data = {
+            name: form.username,
+            email: form.email
+        };
+        store.dispatch({type: `server/${form.method}`, userId: form.userId, userData: data});
     }
 };
 
