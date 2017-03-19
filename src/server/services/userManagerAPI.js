@@ -19,17 +19,14 @@ router.route('/users')
         console.log('post user', req.body);
         userManager.addUser(req.body).then(result => {
             res.send(result);
-            // console.log(`userManager response: \n`, result);
         }).catch(error => {
             res.send(error);
             console.error(error);
         });
     })
     .get((req, res) => {
-        console.log('find * users');
         userManager.findUser().then(result => {
             res.json(result);
-            // console.log(`userManager response: \n`, result);
         }).catch(error => {
             res.send(error);
             console.error(error);
@@ -38,35 +35,33 @@ router.route('/users')
 
 router.route('/users/:user_id')
     .get((req, res) => {
-        console.log('find user', req.params.user_id);
         userManager.findUser(req.params.user_id).then(result => {
             res.json(result);
-            // console.log(`userManager response: \n`, result);
         }).catch(error => {
             res.send(error);
             console.error(error);
         });
     })
     .put((req, res) => {
-        //TODO
-        console.log('update user', req.body, req.params.user_id);
         userManager.updateUser(req.body ,req.params.user_id).then(result => {
             console.log(`userManager update: \n`, result);
-            res.json(result);
+            res.send(result);
         }).catch(error => {
-            console.log('update err');
             res.send(error);
             console.error(error);
         });
     })
     .delete((req, res) => {
         userManager.deleteUser(req.params.user_id).then(result => {
-            console.log(result);
-        })
+            res.send(result);
+        }).catch(error => {
+            res.send(error);
+            console.error(error);
+        });
     });
 
 app.use('/api', router);
 
 app.listen(app.get('port'), () => {
-    console.log(`user-manager started on port: ${app.get('port')}`);
+    console.log(`user-manager running on port: ${app.get('port')}`);
 });

@@ -68,14 +68,14 @@ io.on('connect', socket => {
         const request = http.request(httpOptions, res => {
             res.setEncoding('utf8');
             res.on('data', data => {
-                const type = (httpOptions.method === 'GET' ? 'server/result' : 'server/response');
+                const type = (httpOptions.method === 'GET' ? 'server/result' : 'server/notification');
                 socket.emit('action', {type: type, data: data});
             });
         });
 
         if (httpOptions.method === 'POST' || httpOptions.method === 'PUT') {
             let postData = action.userData;
-            postData = (postData && Object.keys(postData).length ? JSON.stringify(postData) : null);
+            postData = (postData && Object.keys(postData).length ? JSON.stringify(postData) : '');
             request.write(postData);
         }
         request.end();

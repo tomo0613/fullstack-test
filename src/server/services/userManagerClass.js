@@ -102,13 +102,13 @@ class userManager {
         };
         return this.checkExistence(userObj).then(response => {
             if (response.length) {
-                return Promise.reject(`User exists with the given: ${response}`);
+                return Promise.reject(`warning@cannot.create.existingProps: ${response}`);
             } else {
                 return this.performQuery(sql).then(rows => {
                     if (rows.affectedRows) {
-                        return Promise.resolve('User successfully created');
+                        return Promise.resolve('success@create.user');
                     } else {
-                        return Promise.reject('User creation failed');
+                        return Promise.reject('failure@create.user');
                     }
                 }).catch(error => Promise.reject(error));
             }
@@ -127,13 +127,13 @@ class userManager {
         };
         return this.checkExistence(userData).then(response => {
             if (response.length) {
-                return Promise.reject(`existing props: ${response}`);
+                return Promise.reject(`warning@cannot.update.existingProps: ${response}`);
             } else {
                 return this.performQuery(sql).then(rows => {
                     if (rows.changedRows) {
-                        return Promise.resolve('User successfully updated');
+                        return Promise.resolve('success@update.user');
                     } else {
-                        return Promise.reject('User update failed');
+                        return Promise.reject('failure@update.user');
                     }
                 }).catch(error => Promise.reject(error));
             }
@@ -152,9 +152,9 @@ class userManager {
         };
         return this.performQuery(sql).then(rows => {
             if (rows.affectedRows) {
-                return Promise.resolve('User successfully deleted');
+                return Promise.resolve('success@delete.user');
             } else {
-                return Promise.reject('Delete failed');
+                return Promise.reject('failure@delete.user');
             }
         }).catch(error => Promise.reject(error));
     }

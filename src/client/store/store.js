@@ -3,6 +3,7 @@ import { reducer as formReducer } from 'redux-form';
 import createSocketIoMiddleware from 'redux-socket.io';
 import io from 'socket.io-client';
 
+import notificationReducer from '../reducers/notificationReducer';
 import userManagerReducer from '../reducers/userManagerReducer';
 
 const socket = io('/');
@@ -13,13 +14,15 @@ const testMiddleware = (store) => (next) => (action) => {
     if (['server/addUser', 'server/updateUser', 'server/deleteUser'].indexOf(action.type) > -1) {
         // console.log('middleware dispatch server/getUser');
         //TODO wait for prev action
-        store.dispatch({type: `server/getUser`, data: {}});
+
+        // sstore.dispatch({type: `server/getUser`, data: {}});
     }
 
     return next(action);
 };
 
 const reducers = {
+    notificationStore: notificationReducer,
     userManager: userManagerReducer,
     // ... your other reducers here ...
     form: formReducer
@@ -27,7 +30,6 @@ const reducers = {
 
 const reducer = combineReducers(reducers);
 const middlewares = [socketIoMiddleware, testMiddleware];
-// const store = applyMiddleware(...middlewares)(createStore)(reducer);
 const store = createStore(reducer, applyMiddleware(...middlewares));
 
 export default store;

@@ -5,6 +5,9 @@ import store from './store/store';
 import UserManagerForm from './components/admin/UserManagerForm.react';
 import UsersList from './components/admin/UsersList.react';
 import userManagerActions from './actions/userManagerActions';
+import NotificationComponent from './components/common/NotificationComponent.react';
+
+import style from './style/main.scss';
 
 class Main extends React.Component {
     render() {
@@ -15,7 +18,8 @@ class Main extends React.Component {
                 onSubmit: userManagerActions.submitForm,
                 initialValues: {method: 'getUser'}
             }),
-            React.createElement(UsersList)
+            React.createElement(UsersList),
+            React.createElement(NotificationComponent)
         );
     }
 }
