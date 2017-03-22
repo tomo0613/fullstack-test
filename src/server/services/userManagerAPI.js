@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const userManager = require('./userManagerClass');
+const userManager = require('./userManagerModule');
 
 const app = express();
 const router = express.Router();
@@ -15,19 +15,18 @@ router.get('/', (req, res) => {
 });
 
 router.route('/users')
-    .post((req, res) => {
-        console.log('post user', req.body);
-        userManager.addUser(req.body).then(result => {
-            res.send(result);
-        }).catch(error => {
+    .get((req, res) => {
+        userManager.findUser().then((result) => {
+            res.json(result);
+        }).catch((error) => {
             res.send(error);
             console.error(error);
         });
     })
-    .get((req, res) => {
-        userManager.findUser().then(result => {
-            res.json(result);
-        }).catch(error => {
+    .post((req, res) => {
+        userManager.addUser(req.body).then((result) => {
+            res.send(result);
+        }).catch((error) => {
             res.send(error);
             console.error(error);
         });
@@ -35,26 +34,34 @@ router.route('/users')
 
 router.route('/users/:user_id')
     .get((req, res) => {
-        userManager.findUser(req.params.user_id).then(result => {
+        userManager.findUser(req.params.user_id).then((result) => {
             res.json(result);
-        }).catch(error => {
+        }).catch((error) => {
+            res.send(error);
+            console.error(error);
+        });
+    })
+    .post((req, res) => {
+        userManager.authenticateUser(req.body ,req.params.user_id).then((result) => {
+            console.log(`userManager AUTH: \n`, result);
+            res.send(result);
+        }).catch((error) => {
             res.send(error);
             console.error(error);
         });
     })
     .put((req, res) => {
-        userManager.updateUser(req.body ,req.params.user_id).then(result => {
-            console.log(`userManager update: \n`, result);
+        userManager.updateUser(req.body ,req.params.user_id).then((result) => {
             res.send(result);
-        }).catch(error => {
+        }).catch((error) => {
             res.send(error);
             console.error(error);
         });
     })
     .delete((req, res) => {
-        userManager.deleteUser(req.params.user_id).then(result => {
+        userManager.deleteUser(req.params.user_id).then((result) => {
             res.send(result);
-        }).catch(error => {
+        }).catch((error) => {
             res.send(error);
             console.error(error);
         });

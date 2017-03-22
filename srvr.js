@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
+//TODO use JsonWebTokens
 
 const app = express();
 const server = http.createServer(app);
