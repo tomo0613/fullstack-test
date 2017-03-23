@@ -20,27 +20,33 @@ function performQuery(connectionPool, sql) {
 
 class userManager {
     constructor() {
-        this.tableName = 'users2';  //const tableName = Symbol('tableName');
+        this.tableName = 'users2';
         dbConfig.database = 'node_test';
         // dbConfig.connectionLimit = 10;
         this.pool = mysql.createPool(dbConfig);
     }
-
-    createTable() {
-        const query = `CREATE TABLE IF NOT EXISTS ${this.tableName} (
-            id INT NOT NULL AUTO_INCREMENT,
-            name VARCHAR(60),
-            email VARCHAR(60),
-            passwd VARCHAR(60),
-            status VARCHAR(60),
-            last_login DATETIME,
-            registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY(id)
-        )`;
-        //TODO
-        // CREATE TRIGGER insert_uuid BEFORE INSERT ON ${this.tableName}
-        // FOR EACH ROW SET id = UUID();
-        return performQuery(this.pool, {query: query, values: null}).then((result) => Promise.resolve(result));
+    //store uuid
+    //store hash efficently: https://github.com/ademarre/binary-mcf
+    create(qId) {
+        const queries = {
+            table: `
+                CREATE TABLE IF NOT EXISTS ${this.tableName} (
+                uuid CHAR(36) NOT NULL,
+                name VARCHAR(60),
+                email VARCHAR(60),
+                passwd CHAR(60),
+                status VARCHAR(60),
+                last_login DATETIME,
+                registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY(uuid)
+            )`,
+            trigger: `
+                CREATE TRIGGER insert_uuid
+                BEFORE INSERT ON ${this.tableName}
+                FOR EACH ROW SET NEW.id = UUID()
+            `
+        };
+        return performQuery(this.pool, {query: queries[qId], values: null}).then((result) => Promise.resolve(result));
     }
 
     /**
@@ -48,7 +54,7 @@ class userManager {
      * @param findBy (string)
      * @return (array): [rows]
      */
-    findUser(userData, findBy = 'id') {
+    findUser(userData, findBy = 'name') {
         if (userData !== undefined) {
             userData += '';
         }
@@ -96,7 +102,7 @@ class userManager {
     addUser(userData) {
         const missingProps = ['name', 'email', 'passwd'].filter((reqiredProp) => !userData[reqiredProp]);
         if (missingProps.length) {
-            return Promise.reject(`failure@cannot.create.missingProps: ${missingProps}`);
+            return Promise.reject(`failure@create.user.missingProps: ${missingProps}`);
         }
         userData.passwd = bcrypt.hashSync(userData.passwd);
 
@@ -106,7 +112,7 @@ class userManager {
         };
         return this.checkExistence(userData).then((response) => {
             if (response.length) {
-                return Promise.reject(`warning@cannot.create.existingProps: ${response}`);
+                return Promise.reject(`warning@create.user.existingProps: ${response}`);
             } else {
                 return performQuery(this.pool, sql).then((rows) => {
                     if (rows.affectedRows) {
@@ -120,25 +126,30 @@ class userManager {
     }
 
     /**
-     * TODO
+     * @param credentials (object): {passwd: ''...}
+     * @param userName (string)
+     * @return (string)
      */
     authenticateUser(credentials, userName) {
-        console.log('\n------------\n', credentials, userName);
-        //toStr ??
+        if (!credentials.passwd || !userName) {
+            return Promise.reject(`failure@authenticate.user.missingPasswdOrUserName`);
+        }
         const sql = {
             query:  `SELECT passwd FROM ${this.tableName} WHERE name = ? LIMIT 1`,
             values: userName
         };
         return performQuery(this.pool, sql).then((row) => {
             if (row && row.length) {
-                // if ( bcrypt.compareSync(credentials.passwd, row[0].passwd) ) {
-                //
-                // }
-                console.log(row[0].passwd);
-                // return Promise.resolve('success@authenticate.user');
+                if (bcrypt.compareSync(credentials.passwd, row[0].passwd)) {
+                    //TODO update last_login
+                    //TODO send JsonWebToken
+                    return Promise.resolve('success@authenticate.user');
+                } else {
+                    //TODO handle attempts
+                    return Promise.reject('failure@authenticate.user.wrongPasswd');
+                }
             } else {
-                console.log('fail hibás felhasználó');
-                // return Promise.reject('failure@authenticate.user');
+                return Promise.reject('failure@authenticate.user.wrongUser');
             }
         }).catch((error) => Promise.reject(error));
     }
