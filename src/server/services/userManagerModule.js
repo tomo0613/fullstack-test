@@ -35,7 +35,7 @@ class userManager {
                 name VARCHAR(60),
                 email VARCHAR(60),
                 passwd CHAR(60),
-                status VARCHAR(60),
+                role ENUM('user', 'moderator', 'admin') NOT NULL DEFAULT 'user',
                 last_login DATETIME,
                 registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY(uuid)
@@ -104,6 +104,7 @@ class userManager {
         if (missingProps.length) {
             return Promise.reject(`failure@create.user.missingProps: ${missingProps}`);
         }
+        //TODO verify email
         userData.passwd = bcrypt.hashSync(userData.passwd);
 
         const sql = {
@@ -139,17 +140,21 @@ class userManager {
             values: userName
         };
         return performQuery(this.pool, sql).then((row) => {
-            if (row && row.length) {
-                if (bcrypt.compareSync(credentials.passwd, row[0].passwd)) {
-                    //TODO update last_login
-                    //TODO send JsonWebToken
-                    return Promise.resolve('success@authenticate.user');
-                } else {
-                    //TODO handle attempts
-                    return Promise.reject('failure@authenticate.user.wrongPasswd');
-                }
-            } else {
+            if (!row || !row.length) {
                 return Promise.reject('failure@authenticate.user.wrongUser');
+            }
+            if (bcrypt.compareSync(credentials.passwd, row[0].passwd)) {
+                //TODO update last_login
+                sql.query = `SELECT role FROM ${this.tableName} WHERE name = ? LIMIT 1`;
+                return performQuery(this.pool, sql).then((row) => {
+                    if (!row && !row.length) {
+                        return Promise.reject('failure@authenticate.user.dataError');
+                    }
+                    return Promise.resolve({username: userName, role: row[0].role});
+                }).catch((error) => Promise.reject(error));
+            } else {
+                //TODO handle attempts
+                return Promise.reject('failure@authenticate.user.wrongPasswd');
             }
         }).catch((error) => Promise.reject(error));
     }

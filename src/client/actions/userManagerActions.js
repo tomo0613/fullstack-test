@@ -4,9 +4,18 @@ const userManagerActions = {
     submitForm: (form) => {
         const data = {
             name: form.username,
-            email: form.email
+            email: form.email,
+            passwd: form.password
         };
-        store.dispatch({type: `server/${form.method}`, userId: form.userId, userData: data});
+        const token = localStorage.getItem('jwt');
+        store.dispatch({type: `server/${form.method}`, userId: form.userId, userData: data, token: token});
+    },
+    signIn: (form) => {
+        const credentials = {passwd: form.password};
+        store.dispatch({type: `server/authenticateUser`, userId: form.username, userData: credentials});
+    },
+    signOut: () => {
+        localStorage.removeItem('jwt');
     }
 };
 

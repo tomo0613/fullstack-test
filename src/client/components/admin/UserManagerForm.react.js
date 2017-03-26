@@ -18,7 +18,7 @@ class UserManagerForm extends React.Component {
                         type: 'radio',
                         value: 'getUser'
                     }),
-                    'getUser'
+                    'Find user(s)'
                 ),
                 React.DOM.label(
                     {},
@@ -28,7 +28,7 @@ class UserManagerForm extends React.Component {
                         type: 'radio',
                         value: 'addUser'
                     }),
-                    'addUser'
+                    'Create user'
                 ),
                 React.DOM.label(
                     {},
@@ -38,7 +38,7 @@ class UserManagerForm extends React.Component {
                         type: 'radio',
                         value: 'updateUser'
                     }),
-                    'updateUser'
+                    'Update user'
                 ),
                 React.DOM.label(
                     {},
@@ -48,12 +48,12 @@ class UserManagerForm extends React.Component {
                         type: 'radio',
                         value: 'deleteUser'
                     }),
-                    'deleteUser'
+                    'Delete user'
                 )
             ),
             React.DOM.div(
                 {},
-                React.DOM.label({htmlFor: 'userId'}, 'USERID'),
+                React.DOM.label({htmlFor: 'userId'}, 'UUID'),
                 React.createElement(Field, {
                     name: 'userId',
                     component: 'input',
@@ -63,7 +63,7 @@ class UserManagerForm extends React.Component {
             ),
             React.DOM.div(
                 {},
-                React.DOM.label({htmlFor: 'username'}, 'USERNAME'),
+                React.DOM.label({htmlFor: 'username'}, 'Username: '),
                 React.createElement(Field, {
                     name: 'username',
                     component: 'input',
@@ -73,11 +73,21 @@ class UserManagerForm extends React.Component {
             ),
             React.DOM.div(
                 {},
-                React.DOM.label({}, 'EMAIL'),
+                React.DOM.label({}, 'E-mail: '),
                 React.createElement(Field, {
                     name: 'email',
                     component: 'input',
                     type: 'text',
+                    disabled: this.props.method === 'getUser' || this.props.method === 'deleteUser'
+                })
+            ),
+            React.DOM.div(
+                {},
+                React.DOM.label({}, 'Password: '),
+                React.createElement(Field, {
+                    name: 'password',
+                    component: 'input',
+                    type: 'password',
                     disabled: this.props.method === 'getUser' || this.props.method === 'deleteUser'
                 })
             ),

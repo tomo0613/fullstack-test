@@ -1,4 +1,5 @@
 .idea/
 src/server/.dbConfig.js
+src/server/config.js
 node_modules/*
 npm-debug.log

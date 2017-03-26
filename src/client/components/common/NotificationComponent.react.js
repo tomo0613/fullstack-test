@@ -9,7 +9,7 @@ class NotificationComponent extends React.Component {
             visibleNotifications: []
         };
 
-        this.msToWait = 5000;
+        this.msToWait = 7*1000;
         this.timeoutStore = {};
         this.startFadeOutCountdown = this.startFadeOutCountdown.bind(this);
         this.cancelFadeOutCountdown = this.cancelFadeOutCountdown.bind(this);

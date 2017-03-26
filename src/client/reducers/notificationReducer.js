@@ -5,6 +5,7 @@ let newNotification;
 
 export default function notificationReducer(state = initialState, action) {
     switch (action.type) {
+        case 'client/notification':
         case 'server/notification':
             newNotification = {
                 text: action.data,
