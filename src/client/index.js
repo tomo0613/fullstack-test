@@ -2,7 +2,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { Router, Route } from 'react-router';
+import createHistory from 'history/createBrowserHistory';
 import store from './store/store';
+
 import UserManagerForm from './components/admin/UserManagerForm.react';
 import UsersList from './components/admin/UsersList.react';
 import userManagerActions from './actions/userManagerActions';
@@ -31,7 +34,14 @@ class Main extends React.Component {
 }
 
 ReactDOM.render(
-    //TODO + React router
-    React.createElement(Provider, {store: store}, React.createElement(Main)),
-    document.getElementById('mainContainer')
+    React.createElement(Provider,
+        {store: store},
+        React.createElement(Router,
+            {history: createHistory()},
+            React.createElement(Route,
+                {path: '/', component: Main}/*,
+                React.createElement(Route, {})*/
+            )
+        )
+    ), document.getElementById('rootElement')
 );

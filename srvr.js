@@ -7,6 +7,7 @@ const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+const port = process.env.PORT || 3000;
 
 (function() {
     if (process.env.NODE_ENV !== 'dev') {
@@ -37,8 +38,10 @@ const httpOptions = {
     }
 };
 
+
 app.use(express.static(path.join(__dirname, 'build')));
 app.use(bodyParser.urlencoded({extended: false}));
+app.all('*', (req, res) => res.sendFile(path.join(__dirname, 'build', 'index.html')) );
 
 io.on('connect', socket => {
     //TODO userManager.router(...)
@@ -89,8 +92,6 @@ io.on('connect', socket => {
     });
 });
 
-app.set('port', (process.env.PORT || 3000));
-
-server.listen(app.get('port'), () => {
-    console.log('Server listening on PORT:' + app.get('port'));
+server.listen(port, () => {
+    console.log(`Server listening on PORT: ${port}`);
 });

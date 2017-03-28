@@ -8,9 +8,9 @@ module.exports = (props) => {
             jwt.verify(token, props.secret, (err, decodedPayload) => {
                 if (err) {
                     console.error(err);
-                    response.send('Failed to authenticate!');
+                    response.send('error@authenticationFailed.probablyBadToken');
                 } else if (props.roles.indexOf(decodedPayload.role) === -1) {
-                    response.send('Your user is not allowed!');
+                    response.send('warning@permissionNeeded');
                 } else {
                     next();
                 }
