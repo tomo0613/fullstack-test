@@ -100,13 +100,9 @@ UserManagerForm = reduxForm({
     form: 'userManager'
 })(UserManagerForm);
 
-const selector = formValueSelector('userManager');
+function getProps(store) {
+    const selector = formValueSelector('userManager');
+    return {method: selector(store, 'method')};
+}
 
-UserManagerForm = connect(
-    (state) => {
-        const method = selector(state, 'method');
-        return {method};
-    }
-)(UserManagerForm);
-
-export default UserManagerForm;
+export default connect(getProps)(UserManagerForm);

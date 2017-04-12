@@ -27,8 +27,8 @@ class AuthForm extends React.Component {
                 onClick: () => this.checkCredentials() && this.props.signInAction(this.state)
             }, 'signIn'),
             React.DOM.button({
-                onClick: () => this.props.signOutAction()
-            }, 'signOut'),
+                onClick: () => this.openSignUpForm()
+            }, 'signUp')
         );
     }
 
@@ -38,6 +38,10 @@ class AuthForm extends React.Component {
             return false;
         }
         return true;
+    }
+
+    openSignUpForm() {
+        return null;
     }
 }
 

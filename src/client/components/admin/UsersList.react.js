@@ -41,10 +41,8 @@ class UsersList extends React.Component {
     }
 }
 
-UsersList = connect(
-    (state, props) => {
-        return {users: state.userManager.users};
-    }
-)(UsersList);
+function getProps(store) {
+    return {users: store.userManager.users};
+}
 
-export default UsersList;
+export default connect(getProps)(UsersList);

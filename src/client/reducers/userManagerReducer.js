@@ -1,5 +1,6 @@
 const initialState = {
-    users: []
+    users: [],
+    signedIn: !!localStorage.getItem('jwt')
 };
 
 export default function userManagerReducer(state = initialState, action) {
@@ -7,9 +8,9 @@ export default function userManagerReducer(state = initialState, action) {
         // case 'submitForm':
         //     return Object.assign({}, {form: action.data.form});
         case 'server/authorize':
-            //TODO notification
+            //TODO notification Successfully signedIn
             localStorage.setItem('jwt', JSON.parse(action.data).token);
-            return state;
+            return Object.assign( {}, state, {signedIn: true} );
         case 'server/result':
             return Object.assign( {}, state, {users: JSON.parse(action.data)} );
         default:

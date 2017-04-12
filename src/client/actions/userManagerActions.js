@@ -1,7 +1,7 @@
 import store from '../store/store';
 
 const userManagerActions = {
-    submitForm: (form) => {
+    submitAdminForm: (form) => {
         const data = {
             name: form.username,
             email: form.email,
@@ -16,6 +16,10 @@ const userManagerActions = {
     },
     signOut: () => {
         localStorage.removeItem('jwt');
+        store.dispatch({});
+    },
+    signUp: (form) => {
+        //TODO
     }
 };
 

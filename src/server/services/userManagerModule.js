@@ -25,12 +25,13 @@ class userManager {
         // dbConfig.connectionLimit = 10;
         this.pool = mysql.createPool(dbConfig);
     }
-    //store uuid
-    //store hash efficently: https://github.com/ademarre/binary-mcf
+    //TODO store uuid as binary
+    //TODO store hash efficently: https://github.com/ademarre/binary-mcf
     create(qId) {
         const queries = {
             table: `
                 CREATE TABLE IF NOT EXISTS ${this.tableName} (
+                id INT NOT NULL AUTO_INCREMENT,
                 uuid CHAR(36) NOT NULL,
                 name VARCHAR(60),
                 email VARCHAR(60),
@@ -38,12 +39,13 @@ class userManager {
                 role ENUM('user', 'moderator', 'admin') NOT NULL DEFAULT 'user',
                 last_login DATETIME,
                 registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY(uuid)
+                PRIMARY KEY(id)
             )`,
             trigger: `
                 CREATE TRIGGER insert_uuid
                 BEFORE INSERT ON ${this.tableName}
-                FOR EACH ROW SET NEW.id = UUID()
+                FOR EACH ROW
+                SET NEW.id = UUID()
             `
         };
         return performQuery(this.pool, {query: queries[qId], values: null}).then((result) => Promise.resolve(result));
