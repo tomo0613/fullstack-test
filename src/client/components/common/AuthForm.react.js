@@ -1,5 +1,5 @@
 import React from 'react';
-import notificationActions from '../../actions/notificationActions';
+import notificationActions from 'actions/notificationActions';
 
 class AuthForm extends React.Component {
     constructor(props) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import AuthForm from './AuthForm.react';
-import userManagerActions from '../../actions/userManagerActions';
+import AuthForm from 'components/common/AuthForm.react';
+import userManagerActions from 'actions/userManagerActions';
 
 class AuthLogic extends React.Component {
     render() {
