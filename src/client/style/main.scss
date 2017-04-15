@@ -24,28 +24,43 @@ body {
     color: rgb(33, 99, 23);
     background-color: rgb(211, 255, 201);
     border-color: rgb(66, 180, 70);
+    svg {
+        color: rgb(33, 99, 23);
+    }
 }
 
 .failure {
     color: rgb(88, 19, 23);
     background-color: rgb(255, 210, 211);
     border-color: rgb(255, 82, 82);
+    svg {
+        color: rgb(88, 19, 23);
+    }
 }
 
 .info {
     color: rgb(2, 59, 162);
     background-color: rgb(218, 235, 254);
     border-color: rgb(95, 121, 231);
+    svg {
+        fill: rgb(2, 59, 162);
+    }
 }
 
 .warning {
     color: rgb(120, 111, 35);
     background-color: rgb(254, 252, 199);
     border-color: rgb(252, 227, 59);
+    svg {
+        fill: rgb(120, 111, 35);
+    }
 }
 
 .error {
-    color: #FF5252;
-    background-color: #340000;
-    border-color: #FF5252;
+    color: rgb(255, 82, 82);
+    background-color: rgb(52, 0, 0);
+    border-color: rgb(255, 82, 82);
+    svg {
+        fill: rgb(255, 82, 82);
+    }
 }

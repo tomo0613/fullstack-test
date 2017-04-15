@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
     if (process.env.NODE_ENV !== 'dev') {
         return;
     }
-    console.log('++' + '='.repeat(12) + '++\n||  DEV mode  ||\n++' + '='.repeat(12) + '++\n');
+    console.log('\x1b[40m++' + '='.repeat(12) + '++\n||  \x1b[32mDEV mode\x1b[37m  ||\n++' + '='.repeat(12) + '++\n\x1b[0m');
     const webpack = require('webpack');
     const webpackConfig = require('./webpack.dev.config.js');
     const compiler = webpack(webpackConfig);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import Icon from  'components/common/Icon.react'
 
 class NotificationComponent extends React.Component {
     constructor(props) {
@@ -41,14 +42,14 @@ class NotificationComponent extends React.Component {
                     onMouseEnter: () => this.cancelFadeOutCountdown(notification.id),
                     onMouseLeave: () => this.startFadeOutCountdown(notification.id),
                 },
-                //React.DOM.i({className: 'material-icon'}, 'icon-TODO'),
+                Icon.create(notification.class),
                 notification.text,
                 React.DOM.i({
                     onClick: () => {
                         this.cancelFadeOutCountdown(notification.id);
                         this.closeNotification(notification.id);
                     }
-                }, 'x')//TODO material icons
+                }, Icon.create('close'))
             );
         });
 
@@ -76,10 +77,10 @@ class NotificationComponent extends React.Component {
     }
 }
 
-NotificationComponent = connect(
-    (state) => {
-        return {notifications: state.notificationStore.notifications};
-    }
-)(NotificationComponent);
+function getProps(store) {
+    return {
+        notifications: store.notificationStore.notifications
+    };
+}
 
-export default NotificationComponent;
+export default connect(getProps)(NotificationComponent);
