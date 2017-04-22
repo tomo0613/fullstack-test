@@ -1,5 +1,6 @@
 import React from 'react';
 import notificationActions from 'actions/notificationActions';
+import modalActions from 'actions/modalActions';
 
 class AuthForm extends React.Component {
     constructor(props) {
@@ -27,7 +28,7 @@ class AuthForm extends React.Component {
                 onClick: () => this.checkCredentials() && this.props.signInAction(this.state)
             }, 'signIn'),
             React.DOM.button({
-                onClick: () => this.openSignUpForm()
+                onClick: () => modalActions.open('signUp')
             }, 'signUp')
         );
     }
@@ -38,10 +39,6 @@ class AuthForm extends React.Component {
             return false;
         }
         return true;
-    }
-
-    openSignUpForm() {
-        return null;
     }
 }
 

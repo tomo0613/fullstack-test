@@ -9,6 +9,7 @@ import userManagerActions from 'actions/userManagerActions';
 import AuthLogic from 'components/common/AuthLogic.react';
 import MenuBar from 'components/common/MenuBar.react';
 import NotificationComponent from 'components/common/NotificationComponent.react';
+import ModalContainer from 'components/common/ModalContainer.react';
 
 import style from 'style/main.scss';
 
@@ -27,6 +28,7 @@ class Main extends React.Component {
                 initialValues: {method: 'getUser'}
             }),
             React.createElement(UsersList),
+            React.createElement(ModalContainer),
             React.createElement(NotificationComponent)
         );
     }

@@ -19,6 +19,7 @@ const userManagerActions = {
         store.dispatch({});
     },
     signUp: (form) => {
+        console.log('signUp action');
         //TODO
     }
 };
