@@ -8,19 +8,32 @@ const userManagerActions = {
             passwd: form.password
         };
         const token = localStorage.getItem('jwt');
-        store.dispatch({type: `server/${form.method}`, userId: form.userId, userData: data, token: token});
+        store.dispatch({
+            type: 'server/' + form.method,
+            userId: form.userId,
+            userData: data,
+            token: token
+        });
     },
     signIn: (form) => {
         const credentials = {passwd: form.password};
-        store.dispatch({type: `server/authenticateUser`, userId: form.username, userData: credentials});
+        store.dispatch({
+            type: 'server/authenticateUser',
+            userId: form.username,
+            userData: credentials
+        });
     },
     signOut: () => {
         localStorage.removeItem('jwt');
-        store.dispatch({});
+        store.dispatch({
+            type: 'client/signOut'
+        });
     },
     signUp: (form) => {
         console.log('signUp action');
-        //TODO
+        store.dispatch({
+            type: 'server/signUp'
+        });
     }
 };
 

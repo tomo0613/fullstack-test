@@ -9,11 +9,11 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
-(function() {
+(() => {
     if (process.env.NODE_ENV !== 'dev') {
         return;
     }
-    console.log('\x1b[40m++' + '='.repeat(12) + '++\n||  \x1b[32mDEV mode\x1b[37m  ||\n++' + '='.repeat(12) + '++\n\x1b[0m');
+    console.log('\x1b[40m+' + '-'.repeat(12) + '+\n|  \x1b[32mDEV mode\x1b[37m  |\n+' + '-'.repeat(12) + '+\n\x1b[0m');
     const webpack = require('webpack');
     const webpackConfig = require('./webpack.dev.config.js');
     const compiler = webpack(webpackConfig);
@@ -53,11 +53,9 @@ io.on('connect', socket => {
             case 'server/getUser':
                 httpOptions.method = 'GET';
                 break;
-            case 'server/authenticateUser':
-                httpOptions.method = 'POST';
-                break;
             case 'server/addUser':
                 httpOptions.path = '/api/users';
+            case 'server/authenticateUser':
                 httpOptions.method = 'POST';
                 break;
             case 'server/updateUser':
@@ -72,14 +70,18 @@ io.on('connect', socket => {
 
         const request = http.request(httpOptions, res => {
             res.setEncoding('utf8');
-            res.on('data', data => {
-                let type = (action.type === 'server/authenticateUser' ? 'server/authorize' : 'server/result');
+            res.on('data', (data) => {
+                console.log(data);
                 try {
-                    JSON.parse(data);
+                    data = JSON.parse(data);
                 } catch (e) {
-                    type = 'server/notification';
+                    console.log('-- error >:( --', e);//TODO
                 }
-                socket.emit('action', {type: type, data: data});
+                socket.emit('action', {
+                    type: action.type.split('/')[1],
+                    data: data.data,
+                    notification: data.message
+                });
             });
         });
 

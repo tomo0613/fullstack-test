@@ -15,6 +15,10 @@ module.exports = {
                 presets: ['env', 'react'],
                 plugins: ['transform-class-properties']
             }
+        }, {
+            test: /\.scss$/,
+            exclude: /node_modules/,
+            loader: ['style-loader', 'css-loader', 'sass-loader']
         }]
     },
     resolve: {

@@ -1,8 +1,6 @@
 module.exports = (filter, middleware) => {
     return function(req, res, next) {
-        //TODO filter path / regex
-        // console.log('req.path: ', req.path);
-        // console.log('req.method: ', req.method);
+        //TODO filter req.path as well -> filter={path|method: path ? str|regex : str}
         if (filter.method === req.method) {
             return next();
         } else {

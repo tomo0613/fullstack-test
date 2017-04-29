@@ -29,7 +29,7 @@ router.route('/users')
     })
     .post((req, res) => {
         userManager.addUser(req.body).then((result) => {
-            res.send(result);
+            res.json(result);
         }).catch((error) => {
             res.send(error);
             console.error(error);
@@ -48,7 +48,10 @@ router.route('/users/:user_id')
     .post((req, res) => {
         userManager.authenticateUser(req.body, req.params.user_id).then((result) => {
             if (typeof result !== 'string') {
-                res.json({"token": jwt.sign(result, jwtSecret)});
+                res.json({
+                    data: jwt.sign(result.data, jwtSecret),
+                    message: result.message
+                });
             } else {
                 res.send(result);
             }
@@ -59,7 +62,7 @@ router.route('/users/:user_id')
     })
     .put((req, res) => {
         userManager.updateUser(req.body, req.params.user_id).then((result) => {
-            res.send(result);
+            res.json(result);
         }).catch((error) => {
             res.send(error);
             console.error(error);
@@ -67,7 +70,7 @@ router.route('/users/:user_id')
     })
     .delete((req, res) => {
         userManager.deleteUser(req.params.user_id).then((result) => {
-            res.send(result);
+            res.json(result);
         }).catch((error) => {
             res.send(error);
             console.error(error);
@@ -77,5 +80,5 @@ router.route('/users/:user_id')
 app.use('/api', router);
 
 app.listen(app.get('port'), () => {
-    console.log(`user-manager running on port: ${app.get('port')}`);
+    console.log('user-manager started on port:' + app.get('port'));
 });

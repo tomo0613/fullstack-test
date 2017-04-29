@@ -7,31 +7,24 @@ import notificationReducer from 'reducers/notificationReducer';
 import modalReducer from 'reducers/modalReducer';
 import userManagerReducer from 'reducers/userManagerReducer';
 
-const socket = io('/');
-const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
-
-///
-const testMiddleware = (store) => (next) => (action) => {
-    if (['server/addUser', 'server/updateUser', 'server/deleteUser'].indexOf(action.type) > -1) {
-        // console.log('middleware dispatch server/getUser');
-        //TODO wait for prev action
-
-        // sstore.dispatch({type: `server/getUser`, data: {}});
-    }
-
-    return next(action);
-};
-
-const reducers = {
+const reducer = combineReducers({
     notificationStore: notificationReducer,
     modalStore: modalReducer,
     userManager: userManagerReducer,
-    // ... your other reducers here ...
     form: formReducer
+});
+
+const socket = io('/');
+
+const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
+
+const notificationMiddleware = (store) => (next) => (action) => {
+    if (action.notification) {
+        store.dispatch({type: `client/notification`, data: action.notification});
+    }
+    return next(action);
 };
 
-const reducer = combineReducers(reducers);
-const middlewares = [socketIoMiddleware, testMiddleware];
-const store = createStore(reducer, applyMiddleware(...middlewares));
+const middlewares = [socketIoMiddleware, notificationMiddleware];
 
-export default store;
+export default createStore(reducer, applyMiddleware(...middlewares));

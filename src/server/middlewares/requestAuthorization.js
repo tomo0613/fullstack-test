@@ -8,15 +8,15 @@ module.exports = (props) => {
             jwt.verify(token, props.secret, (err, decodedPayload) => {
                 if (err) {
                     console.error(err);
-                    response.send('error@authenticationFailed.probablyBadToken');
+                    response.json({message: 'error@authenticationFailed.probablyBadToken'});
                 } else if (props.roles.indexOf(decodedPayload.role) === -1) {
-                    response.send('warning@permissionNeeded');
+                    response.json({message: 'warning@permissionNeeded'});
                 } else {
                     next();
                 }
             });
         } else {
-            response.send('error@noTokenProvided.tryToSignIn');
+            response.json({message: 'error@noTokenProvided.tryToSignIn'});
         }
     };
     requestAuthorization.filter = (filter) => routeFilter(filter, requestAuthorization);

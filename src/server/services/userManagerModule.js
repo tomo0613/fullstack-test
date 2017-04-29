@@ -3,8 +3,9 @@ const dbConfig = require('../.dbConfig');
 const bcrypt = require('bcrypt-nodejs');
 
 /**
- * @param sql (object): { query: 'string', values: (object) || (null) }
- * @return (array): [rows]
+ * @param {object} connectionPool
+ * @param {object} sql - { query: 'string', values: (object) | (null) }
+ * @return {array} - result of query
  */
 function performQuery(connectionPool, sql) {
     return connectionPool.getConnection().then((connection) => {
@@ -52,9 +53,9 @@ class userManager {
     }
 
     /**
-     * @param userData (string)
-     * @param findBy (string)
-     * @return (array): [rows]
+     * @param {string} userData - value to search for
+     * @param {string} findBy - database column
+     * @return {object} - data as array of found rows
      */
     findUser(userData, findBy = 'name') {
         if (userData !== undefined) {
@@ -66,31 +67,31 @@ class userManager {
             values: userData || null
         };
         return performQuery(this.pool, sql).then((rows) => {
-            return Promise.resolve(rows);
+            return Promise.resolve({data: rows});
         }).catch((error) => Promise.reject(error));
     }
 
     /**
-     * @param userData (object): {name: '', email: '', ...}
-     * @param propsToCheck (array): ['name', ...]
-     * @return (array)
+     * @param {object} userData - {name: '', email: '', ...}
+     * @param {array} keysToCheck - database columns
+     * @return {array} - keys of existing values
      */
-    checkExistence(userData, propsToCheck = ['name', 'email']) {
+    checkExistence(userData, keysToCheck = ['name', 'email']) {
         if (!userData) {
             throw Error('missing user object');
         }
-        const checkProps = propsToCheck.map((prop) => {
+        const checkKeys = keysToCheck.map((prop) => {
             if (userData[prop]) {
                 return this.findUser(userData[prop], prop);
             } else {
                 return Promise.resolve([]);
             }
         });
-        return Promise.all(checkProps).then((results) => {
+        return Promise.all(checkKeys).then((results) => {
             let existingProps = [];
             results.forEach((result, index) => {
-                if (result.length) {
-                    existingProps.push(propsToCheck[index]);
+                if (result.data && result.data.length) {
+                    existingProps.push(keysToCheck[index]);
                 }
             });
             return Promise.resolve(existingProps);
@@ -98,13 +99,13 @@ class userManager {
     }
 
     /**
-     * @param userData (object): {name: '', email: '', ...}
-     * @return (string)
+     * @param {object} userData - {name: '', email: '', ...}
+     * @return {object} - msg
      */
     addUser(userData) {
         const missingProps = ['name', 'email', 'passwd'].filter((reqiredProp) => !userData[reqiredProp]);
         if (missingProps.length) {
-            return Promise.reject(`failure@create.user.missingProps: ${missingProps}`);
+            return Promise.reject({message: 'failure@create.user.missingProps: ' + missingProps});
         }
         //TODO verify email
         userData.passwd = bcrypt.hashSync(userData.passwd);
@@ -115,13 +116,13 @@ class userManager {
         };
         return this.checkExistence(userData).then((response) => {
             if (response.length) {
-                return Promise.reject(`warning@create.user.existingProps: ${response}`);
+                return Promise.reject({message: 'warning@create.user.existingProps: ' + response});
             } else {
                 return performQuery(this.pool, sql).then((rows) => {
                     if (rows.affectedRows) {
-                        return Promise.resolve('success@create.user');
+                        return Promise.resolve({message: 'success@create.user'});
                     } else {
-                        return Promise.reject('failure@create.user');
+                        return Promise.reject({message: 'failure@create.user'});
                     }
                 }).catch((error) => Promise.reject(error));
             }
@@ -129,9 +130,9 @@ class userManager {
     }
 
     /**
-     * @param credentials (object): {passwd: ''...}
-     * @param userName (string)
-     * @return (string)
+     * @param  {object} credentials - required data for authentication {passwd: ''...}
+     * @param  {string} userName
+     * @return {object} - msg & auth data
      */
     authenticateUser(credentials, userName) {
         if (!credentials.passwd || !userName) {
@@ -143,28 +144,31 @@ class userManager {
         };
         return performQuery(this.pool, sql).then((row) => {
             if (!row || !row.length) {
-                return Promise.reject('failure@authenticate.user.wrongUser');
+                return Promise.reject({message: 'failure@authenticate.user.wrongUser'});
             }
             if (bcrypt.compareSync(credentials.passwd, row[0].passwd)) {
                 //TODO update last_login
                 sql.query = `SELECT role FROM ${this.tableName} WHERE name = ? LIMIT 1`;
                 return performQuery(this.pool, sql).then((row) => {
                     if (!row && !row.length) {
-                        return Promise.reject('failure@authenticate.user.dataError');
+                        return Promise.reject({message: 'failure@authenticate.user.dataError'});
                     }
-                    return Promise.resolve({username: userName, role: row[0].role});
+                    return Promise.resolve({
+                        data: {username: userName, role: row[0].role},
+                        message: 'success@authenticateUser'
+                    });
                 }).catch((error) => Promise.reject(error));
             } else {
                 //TODO handle attempts
-                return Promise.reject('failure@authenticate.user.wrongPasswd');
+                return Promise.reject({message: 'failure@authenticate.user.wrongPasswd'});
             }
         }).catch((error) => Promise.reject(error));
     }
 
     /**
-     * @param userData (object): {name: '', email: '', ...}
-     * @param userId (TODO)
-     * @return (string)
+     * @param {object} userData - {name: '', email: '', ...}
+     * @param {string} userId (TODO)
+     * @return {object} - msg
      */
     updateUser(userData, userId) {
         const providedProps = Object.keys(userData);
@@ -190,9 +194,9 @@ class userManager {
             } else {
                 return performQuery(this.pool, sql).then((rows) => {
                     if (rows.changedRows) {
-                        return Promise.resolve('success@update.user');
+                        return Promise.resolve({message: 'success@update.user'});
                     } else {
-                        return Promise.reject('failure@update.user');
+                        return Promise.reject({message: 'failure@update.user'});
                     }
                 }).catch((error) => Promise.reject(error));
             }
@@ -200,20 +204,20 @@ class userManager {
     }
 
     /**
-     * @param userId (TODO)
-     * @return (string)
+     * @param {string} userId (TODO)
+     * @return {object} - msg
      */
     deleteUser(userId) {
-        userId += '';
+        userId += '';//TODO ??
         const sql = {
             query: `DELETE FROM ${this.tableName} WHERE id = ?`,
             values: userId
         };
         return performQuery(this.pool, sql).then((rows) => {
             if (rows.affectedRows) {
-                return Promise.resolve('success@delete.user');
+                return Promise.resolve({message: 'success@delete.user'});
             } else {
-                return Promise.reject('failure@delete.user');
+                return Promise.reject({message: 'failure@delete.user'});
             }
         }).catch((error) => Promise.reject(error));
     }
