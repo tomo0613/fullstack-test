@@ -46,8 +46,10 @@ app.all('*', (req, res) => res.sendFile(path.join(__dirname, 'build', 'index.htm
 io.on('connect', socket => {
     //TODO userManager.router(...)
     socket.on('action', (action) => {
-        httpOptions.path = path.join('/api/users', action.userId || '');
         httpOptions.headers.authorization = action.token || '';
+
+        //httpOptions = userManager.router(action, httpOptions);
+        httpOptions.path = path.join('/api/users', action.userId || '');
 
         switch (action.type) {
             case 'server/getUser':
@@ -71,7 +73,6 @@ io.on('connect', socket => {
         const request = http.request(httpOptions, res => {
             res.setEncoding('utf8');
             res.on('data', (data) => {
-                console.log(data);
                 try {
                     data = JSON.parse(data);
                 } catch (e) {
@@ -86,7 +87,7 @@ io.on('connect', socket => {
         });
 
         if (httpOptions.method === 'POST' || httpOptions.method === 'PUT') {
-            let postData = action.userData;
+            let postData = action.postData;
             postData = (postData && Object.keys(postData).length ? JSON.stringify(postData) : '');
             request.write(postData);
         }

@@ -19,15 +19,13 @@ class Main extends React.Component {
             {className: 'mainContainer'},
             React.DOM.h1({}, 'Hello world!'),
             React.createElement(AuthLogic, {},
-                React.createElement(MenuBar, {
-                    signOutAction: userManagerActions.signOut
-                })
+                React.createElement(MenuBar),
+                React.createElement(UserManagerForm, {
+                    onSubmit: userManagerActions.submitAdminForm,
+                    initialValues: {method: 'getUser'}
+                }),
+                React.createElement(UsersList)
             ),
-            React.createElement(UserManagerForm, {
-                onSubmit: userManagerActions.submitAdminForm,
-                initialValues: {method: 'getUser'}
-            }),
-            React.createElement(UsersList),
             React.createElement(ModalContainer),
             React.createElement(NotificationComponent)
         );

@@ -6,7 +6,7 @@ import userManagerActions from 'actions/userManagerActions';
 class AuthLogic extends React.Component {
     render() {
         return this.props.signedIn ? (
-            this.props.children
+            React.DOM.div({}, this.props.children)
         ) : (
             React.createElement(AuthForm, {
                 signInAction: userManagerActions.signIn,

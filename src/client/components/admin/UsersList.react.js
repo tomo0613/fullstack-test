@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 class UsersList extends React.Component {
     render() {
-        const columns = ['id', 'name', 'email', 'role', 'registration_date'];
+        const columns = ['id', 'name', 'email', 'role', 'last_login', 'registration_date'];
 
         const createTableHead = () => {
             const headers = columns.map((colId, i) => {

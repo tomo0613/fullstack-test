@@ -61,7 +61,7 @@ class userManager {
         if (userData !== undefined) {
             userData += '';
         }
-        const query = `SELECT * FROM ${this.tableName}`;
+        const query = `SELECT * FROM ${this.tableName}`;//TODO exclude passwd...
         const sql = {
             query: !userData ? query : query + ` WHERE ${findBy} = ? LIMIT 1`,
             values: userData || null
@@ -147,12 +147,16 @@ class userManager {
                 return Promise.reject({message: 'failure@authenticate.user.wrongUser'});
             }
             if (bcrypt.compareSync(credentials.passwd, row[0].passwd)) {
-                //TODO update last_login
                 sql.query = `SELECT role FROM ${this.tableName} WHERE name = ? LIMIT 1`;
                 return performQuery(this.pool, sql).then((row) => {
                     if (!row && !row.length) {
                         return Promise.reject({message: 'failure@authenticate.user.dataError'});
                     }
+                    //TODO handle DST & Timezone
+                    performQuery(this.pool, {
+                        query: `UPDATE ${this.tableName} SET last_login = ? WHERE name = ?`,
+                        values: [new Date().toISOString(), userName]
+                    });
                     return Promise.resolve({
                         data: {username: userName, role: row[0].role},
                         message: 'success@authenticateUser'

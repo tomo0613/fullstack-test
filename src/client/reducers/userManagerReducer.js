@@ -1,6 +1,7 @@
 const initialState = {
     users: [],
-    signedIn: !!localStorage.getItem('jwt')
+    signedIn: !!localStorage.getItem('jwt'),
+    signedAs: localStorage.getItem('role') || 'user'
 };
 
 export default function userManagerReducer(state = initialState, action) {
@@ -9,8 +10,9 @@ export default function userManagerReducer(state = initialState, action) {
             if (!action.data) {
                 return state;
             }
-            localStorage.setItem('jwt', action.data);
-            return Object.assign( {}, state, {signedIn: true} );
+            localStorage.setItem('jwt', action.data.token);
+            localStorage.setItem('role', action.data.role);
+            return Object.assign( {}, state, {signedIn: true, signedAs: action.data.role} );
         case 'getUser':
             if (!action.data) {
                 return state;

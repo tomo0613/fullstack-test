@@ -49,7 +49,10 @@ router.route('/users/:user_id')
         userManager.authenticateUser(req.body, req.params.user_id).then((result) => {
             if (typeof result !== 'string') {
                 res.json({
-                    data: jwt.sign(result.data, jwtSecret),
+                    data: {
+                        token: jwt.sign(result.data, jwtSecret),
+                        role: result.data.role
+                    },
                     message: result.message
                 });
             } else {

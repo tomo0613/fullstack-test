@@ -11,7 +11,7 @@ const userManagerActions = {
         store.dispatch({
             type: 'server/' + form.method,
             userId: form.userId,
-            userData: data,
+            postData: data,
             token: token
         });
     },
@@ -20,11 +20,12 @@ const userManagerActions = {
         store.dispatch({
             type: 'server/authenticateUser',
             userId: form.username,
-            userData: credentials
+            postData: credentials
         });
     },
     signOut: () => {
         localStorage.removeItem('jwt');
+        localStorage.removeItem('role');
         store.dispatch({
             type: 'client/signOut'
         });

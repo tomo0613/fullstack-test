@@ -36,6 +36,6 @@ module.exports = {
             path.resolve('./src/client')
         ]
     },
-    devtool: 'source-map',
+    devtool: '#source-map',
     plugins: [new webpack.HotModuleReplacementPlugin()]
 };
